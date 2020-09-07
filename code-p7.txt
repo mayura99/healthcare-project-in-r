@@ -1,0 +1,72 @@
+#project 7(healthcarecost)
+
+#import the dataset into R environment
+hospd<-read.csv(file.choose())
+View(hospd) 
+ hist(hospd$AGE,main = "Frequency of patients",xlab = "Age",col="skyblue")
+summary(hospd$AGE)
+ agg<-aggregate(hospd[c('TOTCHG')],
+               by = list(AGE=hospd$AGE),                          
+               sum)
+#max (aggregate(hospd[c('TOTCHG')],by = list(AGE=hospd$AGE),sum))
+max(agg)   #BASED ON OUTPUT MAX HOSP VISIT=0-1 YR and max expenditure:678118
+
+ 
+class(hospd$APRDRG) hospd$APRDRG<-as.factor(hospd$APRDRG)
+summary(hospd$APRDRG)
+which.max(summary(hospd$APRDRG))    
+diagnosiscost <- aggregate(TOTCHG ~ APRDRG, FUN = sum, data = hospd)
+diagnosiscost
+ diagnosiscost[which.max(diagnosiscost$TOTCHG),]
+ 
+class(hospd$RACE)
+hospd$RACE<-as.factor(hospd$RACE)
+summary(hospd$RACE) # we find some N/A values 
+hospd<-na.omit(hospd)
+summary(hospd)
+ 
+res<-aov(hospd$TOTCHG~hospd$RACE,data = hospd)
+summary(res)
+summary(hospd$RACE)
+ 
+
+
+ 
+
+
+#Splitting the dataset into the Training set and Test set
+# install.packages('caTools')
+library(caTools)
+set.seed(123)
+split = sample.split(hospd$TOTCHG,SplitRatio = 0.8)
+
+# Feature Scaling
+# training_set = scale(training_set)
+# test_set = scale(test_set)
+
+training_set = subset(hospd,split == TRUE)
+test_set = subset(hospd,split == FALSE)
+summary(training_set)
+
+
+#LINEAR REGREESION MODEL  
+
+hospd$FEMALE<-as.factor(hospd$FEMALE)
+lin<-lm(hospd$TOTCHG~hospd$AGE+hospd$FEMALE,data=hospd)
+summary(lin)            
+ 
+summary(hospd$FEMALE)
+ hospd$RACE<-as.factor(hospd$RACE)
+lin2<-lm(hospd$LOS~hospd$AGE+hospd$FEMALE+hospd$RACE,data = hospd)
+summary(lin2)
+
+
+
+#linear regreession model
+ 
+ln3<-lm(hospd$TOTCHG~hospd$AGE+hospd$FEMALE+hospd$RACE+hospd$LOS+hospd$APRDRG,data=hospd)
+summary(ln3)
+
+
+
+
